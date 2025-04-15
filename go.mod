@@ -8,6 +8,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/google/go-querystring v1.1.0
 	github.com/google/uuid v1.6.0
+	github.com/joho/godotenv v1.5.1
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.10.0
 	go.mau.fi/util v0.8.6

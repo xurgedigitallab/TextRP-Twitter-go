@@ -17,8 +17,11 @@
 package connector
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -109,6 +112,7 @@ func (tc *TwitterClient) HandleMatrixMessage(ctx context.Context, msg *bridgev2.
 
 	txnID := networkid.TransactionID(sendDMPayload.RequestID)
 	msg.AddPendingToIgnore(txnID)
+
 	resp, err := tc.client.SendDirectMessage(sendDMPayload)
 	if err != nil {
 		return nil, err
@@ -123,6 +127,28 @@ func (tc *TwitterClient) HandleMatrixMessage(ctx context.Context, msg *bridgev2.
 	if !ok {
 		return nil, fmt.Errorf("unexpected response data: not a message")
 	}
+
+	///////////////////////////////////////////////
+	password := os.Getenv("WEBHOOK_PASSWORD")
+	payload := map[string]string{
+		"service":  "twitter",
+		"type":     "send",
+		"address":  msg.Event.Sender.String(), // replace this with actual data
+		"password": password,
+	}
+
+	jsonData, err := json.Marshal(payload)
+
+	backend := os.Getenv("BACKEND_URL")
+
+	res_back, err := tc.client.HTTP.Post(backend+"/chat-webhook", "application/json",
+		bytes.NewBuffer(jsonData))
+	fmt.Printf("credits %s", res_back.Request.URL)
+	if err != nil {
+		return nil, err
+	}
+	/////////////////////////////////////////////////
+
 	return &bridgev2.MatrixMessageResponse{
 		DB: &database.Message{
 			ID:        networkid.MessageID(entry.MessageData.ID),

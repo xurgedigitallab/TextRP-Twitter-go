@@ -17,8 +17,10 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/joho/godotenv"
 	"maunium.net/go/mautrix/bridgev2/bridgeconfig"
 	"maunium.net/go/mautrix/bridgev2/matrix/mxmain"
 
@@ -44,6 +46,11 @@ var m = mxmain.BridgeMain{
 
 func main() {
 	bridgeconfig.HackyMigrateLegacyNetworkConfig = migrateLegacyConfig
+	err := godotenv.Load()
+
+	if err != nil {
+		fmt.Printf("Error occured for dotenv %s", err)
+	}
 	m.PostInit = func() {
 		m.CheckLegacyDB(
 			8,
